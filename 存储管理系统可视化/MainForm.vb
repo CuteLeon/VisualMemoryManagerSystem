@@ -373,6 +373,7 @@ Public Class MainForm
     ''' 不分页 载入进程
     ''' </summary>
     Private Sub AddProcessUnSegment()
+        On Error Resume Next
         If FreeMemorySize < ProcessMemorySizeNumeric.Value Then
             LogLabel.TextBox.Text &= "内存不足，无法载入 " & ProcessMemorySizeNumeric.Value & Now.ToString & vbCrLf
             MsgBox("内存不足！")
@@ -422,6 +423,7 @@ Public Class MainForm
     ''' 分页 载入进程
     ''' </summary>
     Private Sub AddProcessSegment()
+        On Error Resume Next
         Dim PageSize As Integer = 8
         Dim PageCount As Double
         PageCount = ProcessMemorySizeNumeric.Value / PageSize
@@ -450,6 +452,7 @@ Public Class MainForm
     ''' 不分页 释放进程
     ''' </summary>
     Private Sub DisposeProcessUnSegment()
+        On Error Resume Next
         FreeMemorySize += ProcessList(ProcessListComboBox.SelectedIndex).Size
         Dim InsMemoryNode As MemoryNodeClass = FirstMemoryNode
         Do While True
@@ -494,6 +497,7 @@ Public Class MainForm
     ''' 分页 释放进程
     ''' </summary>
     Private Sub DisposeProcessSegment()
+        On Error Resume Next
         Dim InsProcess As ProcessClass = ProcessList(ProcessListComboBox.SelectedIndex)
         FreePageCount += InsProcess.PageList.Count
 
@@ -517,6 +521,7 @@ Public Class MainForm
     ''' </summary>
     ''' <returns></returns>
     Private Function CreateMemoryBitmapUnSegmant() As Bitmap
+        On Error Resume Next
         Dim UnityBitmap As Bitmap = New Bitmap(MemoryManagerPanel.Width, MemoryManagerPanel.Height)
         Dim UnityBrush As SolidBrush, UnityPen As Pen
         Dim UnityPoint As Point = Point.Empty
@@ -554,6 +559,7 @@ Public Class MainForm
     ''' </summary>
     ''' <returns></returns>
     Private Function CreateMemoryBitmapSegmant() As Bitmap
+        On Error Resume Next
         Dim UnityBitmap As Bitmap = New Bitmap(MemoryManagerPanel.Width, MemoryManagerPanel.Height)
         Dim UnityBrush As SolidBrush = New SolidBrush(Color.White), UnityPen As Pen = New Pen(UnityBrush, 1)
         Dim UnityPoint As Point = Point.Empty
@@ -588,6 +594,7 @@ Public Class MainForm
     ''' 创建空闲内存区域链表图像
     ''' </summary>
     Private Sub CreateFreeMemoryBitmap(GetNextCFFNode As Boolean)
+        On Error Resume Next
         ReDim NextFreeMemoryNodes(3)
         Dim UnityBitmapSortByAddress As Bitmap = New Bitmap(FreeMemorySortByAddressPanel.Width, FreeMemorySortByAddressPanel.Height)
         Dim UnityBitmapSortBySize As Bitmap = New Bitmap(FreeMemorySortBySizePanel.Width, FreeMemorySortBySizePanel.Height)
