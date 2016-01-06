@@ -299,9 +299,9 @@ Partial Class MainForm
         Me.SegmentPageLabel.ForeColor = System.Drawing.Color.Goldenrod
         Me.SegmentPageLabel.Location = New System.Drawing.Point(5, 308)
         Me.SegmentPageLabel.Name = "SegmentPageLabel"
-        Me.SegmentPageLabel.Size = New System.Drawing.Size(107, 20)
+        Me.SegmentPageLabel.Size = New System.Drawing.Size(149, 20)
         Me.SegmentPageLabel.TabIndex = 36
-        Me.SegmentPageLabel.Text = "设置分页大小："
+        Me.SegmentPageLabel.Text = "设置分页或调度算法："
         '
         'DispatchComboBox
         '
