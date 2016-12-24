@@ -94,6 +94,7 @@
       <DependentUpon>MainForm.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MemoryNodeClass.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -109,6 +110,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Compile Include="ProcessClass.vb" />
     <Compile Include="UnityResource.Designer.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -180,12 +182,6 @@
     <None Include="Resources\Min_2.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Pause.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Play.png" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Resources\Setting_0.png" />
   </ItemGroup>
   <ItemGroup>
@@ -195,16 +191,11 @@
     <None Include="Resources\Setting_2.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\SpeedDown.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\SpeedUp.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\TimeLine.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\Execute.png" />
+    <None Include="Resources\AddProcess.png" />
+    <None Include="Resources\DisposeProcess.png" />
+    <None Include="Resources\Relocate.png" />
+    <None Include="Resources\SegmentPage.png" />
+    <Content Include="TaskList.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
