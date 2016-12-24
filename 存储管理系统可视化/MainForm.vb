@@ -215,7 +215,8 @@ Public Class MainForm
         MemoryManagerPanel.Image = CreateMemoryBitmap()
         MemoryBackUpPanel.Image = MemoryManagerPanel.Image
         CreateFreeMemoryBitmap()
-
+        FreeMemorySize = Max_MemorySize
+        NextPID = 0
         GC.Collect()
     End Sub
 
@@ -240,18 +241,26 @@ Public Class MainForm
         CreateFreeMemoryBitmap()
         Dim NextFreeMemoryNode As MemoryNodeClass = NextFreeMemoryNodes(DispathComboBox.SelectedIndex)
         Dim InsProcess As ProcessClass = New ProcessClass(NextPID, "进程-" & NextPID, ProcessMemorySizeNumeric.Value, Color.FromArgb(UnityRandom.Next(256), UnityRandom.Next(256), UnityRandom.Next(256)))
-        Dim InsMemoryNode As MemoryNodeClass = New MemoryNodeClass(InsProcess, NextFreeMemoryNode.StartPoint, InsProcess.Size)
-        FreeMemorySize -= InsProcess.Size
-        InsMemoryNode.NextNode = NextFreeMemoryNode
-        InsMemoryNode.LastNode = NextFreeMemoryNode.LastNode
-        If IsNothing(NextFreeMemoryNode.LastNode) Then
-            FirstMemoryNode = InsMemoryNode
+
+        If NextFreeMemoryNode.Size - InsProcess.Size < ProcessMemorySizeNumeric.Minimum Then
+            '空闲内存块载入进程后剩余小于最小碎片大小，不生成新的内存块
+            NextFreeMemoryNode.Process = InsProcess
+            FreeMemorySize -= NextFreeMemoryNode.Size
         Else
-            NextFreeMemoryNode.LastNode.NextNode = InsMemoryNode
+            '空闲内存块载入进程后剩余大于最小碎片大小，生成新的内存块
+            Dim InsMemoryNode As MemoryNodeClass = New MemoryNodeClass(InsProcess, NextFreeMemoryNode.StartPoint, InsProcess.Size)
+            FreeMemorySize -= InsProcess.Size
+            InsMemoryNode.NextNode = NextFreeMemoryNode
+            If IsNothing(NextFreeMemoryNode.LastNode) Then
+                FirstMemoryNode = InsMemoryNode
+            Else
+                InsMemoryNode.LastNode = NextFreeMemoryNode.LastNode
+                NextFreeMemoryNode.LastNode.NextNode = InsMemoryNode
+            End If
+            NextFreeMemoryNode.LastNode = InsMemoryNode
+            NextFreeMemoryNode.Size -= InsMemoryNode.Size
+            NextFreeMemoryNode.StartPoint += InsMemoryNode.Size
         End If
-        NextFreeMemoryNode.LastNode = InsMemoryNode
-        NextFreeMemoryNode.Size -= InsMemoryNode.Size
-        NextFreeMemoryNode.StartPoint += InsMemoryNode.Size
 
         ProcessList.Add(InsProcess)
         ProcessListComboBox.Items.Add(InsProcess.Name)
@@ -267,19 +276,24 @@ Public Class MainForm
         If ProcessListComboBox.SelectedIndex = -1 Then Exit Sub
         FreeMemorySize += ProcessList(ProcessListComboBox.SelectedIndex).Size
         Dim InsMemoryNode As MemoryNodeClass = FirstMemoryNode
-        '寻找进程关联的内存并释放内存
         Do While True
+            '寻找进程关联的内存并释放内存
             If Not IsNothing(InsMemoryNode.Process) AndAlso InsMemoryNode.Process.Name = ProcessListComboBox.Text Then
+                InsMemoryNode.Process = Nothing
                 '合并空闲分区
-                LogLabel.TextBox.Text &= IsNothing(InsMemoryNode.LastNode) & vbCrLf
-                If Not IsNothing(InsMemoryNode.LastNode) Then
-                    LogLabel.TextBox.Text &= InsMemoryNode.LastNode.StartPoint & vbCrLf
-                    If IsNothing(InsMemoryNode.LastNode.Process) Then
-                        InsMemoryNode.LastNode.Size += InsMemoryNode.Size
-                        InsMemoryNode.LastNode.NextNode = InsMemoryNode.NextNode
+                If Not IsNothing(InsMemoryNode.LastNode) AndAlso IsNothing(InsMemoryNode.LastNode.Process) Then
+                    InsMemoryNode.LastNode.Size += InsMemoryNode.Size
+                    InsMemoryNode.LastNode.NextNode = InsMemoryNode.NextNode
+                    InsMemoryNode.NextNode.LastNode = InsMemoryNode.LastNode
+                    InsMemoryNode = InsMemoryNode.LastNode
+                End If
+                If Not IsNothing(InsMemoryNode.NextNode) AndAlso IsNothing(InsMemoryNode.NextNode.Process) Then
+                    InsMemoryNode.Size += InsMemoryNode.NextNode.Size
+                    InsMemoryNode.NextNode = InsMemoryNode.NextNode.NextNode
+                    If Not IsNothing(InsMemoryNode.NextNode) Then
+                        InsMemoryNode.NextNode.LastNode = InsMemoryNode
                     End If
                 End If
-                InsMemoryNode.Process = Nothing
                 Exit Do
             End If
             If IsNothing(InsMemoryNode.NextNode) Then Exit Do
@@ -326,10 +340,10 @@ Public Class MainForm
                 Else
                     UnityBrush = New SolidBrush(Color.FromArgb(150, InsMemoryNode.Process.Color))
                     UnityGraphics.FillRectangle(UnityBrush, UnityPoint.X, UnityPoint.Y, UnitySize.Width, UnitySize.Height)
-                    UnityPen = New Pen(Color.FromArgb(200, InsMemoryNode.Process.Color), 1)
-                    UnityGraphics.DrawRectangle(UnityPen, UnityPoint.X + 1, UnityPoint.Y + 1, UnitySize.Width - 2, UnitySize.Height - 2)
+                    'UnityPen = New Pen(Color.FromArgb(200, InsMemoryNode.Process.Color), 1)
+                    'UnityGraphics.DrawRectangle(UnityPen, UnityPoint.X + 1, UnityPoint.Y + 1, UnitySize.Width - 2, UnitySize.Height - 2)
                     UnityBrush.Color = Color.White
-                    UnityGraphics.DrawString(String.Format("{0} 地址:{1},大小:{2}", InsMemoryNode.Process.Name, InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
+                    UnityGraphics.DrawString(String.Format("{0} 地址:{1},大小:{2}{3}", InsMemoryNode.Process.Name, InsMemoryNode.StartPoint, InsMemoryNode.Size, IIf(InsMemoryNode.Size = InsMemoryNode.Process.Size, "", ",进程大小:" & InsMemoryNode.Process.Size)), Me.Font, UnityBrush, UnityPoint)
                 End If
 
                 If IsNothing(InsMemoryNode.NextNode) Then Exit Do
@@ -344,31 +358,34 @@ Public Class MainForm
     End Function
 
     ''' <summary>
-    ''' 创建空白区域链表图像（按首地址大小排序）
+    ''' 创建空白区域链表图像
     ''' </summary>
     Private Sub CreateFreeMemoryBitmap()
+        ReDim NextFreeMemoryNodes(3)
         Dim UnityBitmapSortByAddress As Bitmap = New Bitmap(FreeMemorySortByAddressPanel.Width, FreeMemorySortByAddressPanel.Height)
         'Dim UnityBitmapSortBySize As Bitmap = New Bitmap(FreeMemorySortBySizePanel.Width, FreeMemorySortBySizePanel.Height)
-        Dim UnityBrush As SolidBrush, UnityPen As Pen
+        Dim UnityBrush As SolidBrush, UnityPen As Pen = New Pen(Color.FromArgb(150, Color.White), 1)
         Dim UnityPoint As Point = Point.Empty
         Dim UnitySize As Size = Size.Empty
         Dim InsMemoryNode As MemoryNodeClass = FirstMemoryNode
+        Dim LastX As Integer = FreeMemoryRectangle.Left
         FreeMemoryCellWidth = FreeMemoryRectangle.Width / FreeMemorySize
 
         Using UnityGraphics As Graphics = Graphics.FromImage(UnityBitmapSortByAddress)
             Do While True
                 If IsNothing(InsMemoryNode.Process) Then
-                    UnityPoint = New Point(FreeMemoryRectangle.Left, FreeMemoryRectangle.Top)
+                    UnityPoint = New Point(LastX, FreeMemoryRectangle.Top)
                     UnitySize = New Size(InsMemoryNode.Size * FreeMemoryCellWidth, FreeMemoryRectangle.Height)
+                    LastX += UnitySize.Width
                     UnityBrush = New SolidBrush(Color.FromArgb(100, Color.Gray))
                     UnityGraphics.FillRectangle(UnityBrush, UnityPoint.X, UnityPoint.Y, UnitySize.Width, UnitySize.Height)
                     UnityBrush.Color = Color.FromArgb(200, Color.White)
+                    UnityGraphics.DrawLine(UnityPen, UnityPoint.X, FreeMemoryRectangle.Top, UnityPoint.X, FreeMemoryRectangle.Bottom)
                     UnityGraphics.DrawString(String.Format("空白区域-地址:{0}-大小:{1}".Replace("-", vbCrLf), InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
                     NextFreeMemoryNodes(0) = InsMemoryNode
                 End If
 
                 If IsNothing(InsMemoryNode.NextNode) Then Exit Do
-
                 InsMemoryNode = InsMemoryNode.NextNode
             Loop
 

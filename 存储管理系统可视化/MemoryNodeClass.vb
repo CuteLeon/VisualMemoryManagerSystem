@@ -12,10 +12,6 @@
     ''' </summary>
     Public Size As Integer
     ''' <summary>
-    ''' 内存块结束地址
-    ''' </summary>
-    Public EndPoint As Integer
-    ''' <summary>
     ''' 当前块的前一节点
     ''' </summary>
     Public LastNode As MemoryNodeClass
@@ -34,7 +30,6 @@
         Process = pProcess
         StartPoint = pStartPoint
         Size = pSize
-        EndPoint = pStartPoint + pSize
     End Sub
 
 End Class
