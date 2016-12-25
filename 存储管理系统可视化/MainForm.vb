@@ -305,11 +305,66 @@ Public Class MainForm
 
         MemoryBackUpPanel.Image = MemoryManagerPanel.Image
         MemoryManagerPanel.Image = CreateMemoryBitmap()
+        CreateFreeMemoryBitmap()
 
         GC.Collect()
     End Sub
 
     Private Sub RelocateButton_Click(sender As Object, e As EventArgs) Handles RelocateButton.Click
+        If IsNothing(FirstMemoryNode.NextNode) Then Exit Sub
+        Dim InsMemoryNode As MemoryNodeClass = FirstMemoryNode
+        Do While True
+            If IsNothing(InsMemoryNode.Process) Then
+                If Not IsNothing(InsMemoryNode.LastNode) Then
+                    '消除两个节点中间的空节点
+                    InsMemoryNode.LastNode.NextNode = InsMemoryNode.NextNode
+                    InsMemoryNode.NextNode.LastNode = InsMemoryNode.LastNode
+                    InsMemoryNode.NextNode.StartPoint = InsMemoryNode.LastNode.StartPoint + InsMemoryNode.LastNode.Size
+                    InsMemoryNode = InsMemoryNode.NextNode
+                Else
+                    '首节点为空
+                    InsMemoryNode.NextNode.StartPoint = 0
+                    InsMemoryNode = InsMemoryNode.NextNode
+                    FirstMemoryNode = InsMemoryNode
+                    InsMemoryNode.LastNode = Nothing
+                End If
+            Else
+                '重定位非空节点的地址
+                If InsMemoryNode.Size <> InsMemoryNode.Process.Size Then
+                    FreeMemorySize += InsMemoryNode.Size - InsMemoryNode.Process.Size
+                    InsMemoryNode.Size = InsMemoryNode.Process.Size
+                End If
+                If Not IsNothing(InsMemoryNode.LastNode) Then
+                    InsMemoryNode.StartPoint = InsMemoryNode.LastNode.StartPoint + InsMemoryNode.LastNode.Size
+                End If
+                InsMemoryNode = InsMemoryNode.NextNode
+            End If
+
+            If IsNothing(InsMemoryNode.NextNode) Then
+                '处理最后一个节点
+                If IsNothing(InsMemoryNode.Process) Then
+                    If Not IsNothing(InsMemoryNode.LastNode) Then InsMemoryNode.StartPoint = InsMemoryNode.LastNode.StartPoint + InsMemoryNode.LastNode.Size
+                    InsMemoryNode.Size = FreeMemorySize
+                Else
+                    If InsMemoryNode.Size <> InsMemoryNode.Process.Size Then
+                        FreeMemorySize += InsMemoryNode.Size - InsMemoryNode.Process.Size
+                        InsMemoryNode.Size = InsMemoryNode.Process.Size
+                        Dim LastFreeMemoryNode As MemoryNodeClass = New MemoryNodeClass(Nothing, InsMemoryNode.StartPoint + InsMemoryNode.Size, FreeMemorySize)
+                        InsMemoryNode.NextNode = LastFreeMemoryNode
+                        LastFreeMemoryNode.LastNode = InsMemoryNode
+                    End If
+                    If Not IsNothing(InsMemoryNode.LastNode) Then
+                        InsMemoryNode.StartPoint = InsMemoryNode.LastNode.StartPoint + InsMemoryNode.LastNode.Size
+                    End If
+                End If
+
+                Exit Do
+            End If
+        Loop
+
+        MemoryBackUpPanel.Image = MemoryManagerPanel.Image
+        MemoryManagerPanel.Image = CreateMemoryBitmap()
+        CreateFreeMemoryBitmap()
 
         GC.Collect()
     End Sub
@@ -333,17 +388,17 @@ Public Class MainForm
                 UnityPoint = New Point(MemoryRectangle.Left, CInt(MemoryRectangle.Top + InsMemoryNode.StartPoint * MemoryCellHeight))
                 UnitySize = New Size(MemoryRectangle.Width, CInt(MemoryCellHeight * InsMemoryNode.Size))
                 If IsNothing(InsMemoryNode.Process) Then
-                    UnityBrush = New SolidBrush(Color.FromArgb(100, Color.Gray))
+                    UnityBrush = New SolidBrush(Color.FromArgb(150, Color.Gray))
                     UnityGraphics.FillRectangle(UnityBrush, UnityPoint.X, UnityPoint.Y, UnitySize.Width, UnitySize.Height)
                     UnityBrush.Color = Color.FromArgb(200, Color.White)
-                    UnityGraphics.DrawString(String.Format("空白区域 地址:{0},大小:{1}", InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
+                    UnityGraphics.DrawString(String.Format(" *空闲内存 Addr:{0},Size:{1}", InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
                 Else
                     UnityBrush = New SolidBrush(Color.FromArgb(150, InsMemoryNode.Process.Color))
                     UnityGraphics.FillRectangle(UnityBrush, UnityPoint.X, UnityPoint.Y, UnitySize.Width, UnitySize.Height)
                     'UnityPen = New Pen(Color.FromArgb(200, InsMemoryNode.Process.Color), 1)
                     'UnityGraphics.DrawRectangle(UnityPen, UnityPoint.X + 1, UnityPoint.Y + 1, UnitySize.Width - 2, UnitySize.Height - 2)
-                    UnityBrush.Color = Color.White
-                    UnityGraphics.DrawString(String.Format("{0} 地址:{1},大小:{2}{3}", InsMemoryNode.Process.Name, InsMemoryNode.StartPoint, InsMemoryNode.Size, IIf(InsMemoryNode.Size = InsMemoryNode.Process.Size, "", ",进程大小:" & InsMemoryNode.Process.Size)), Me.Font, UnityBrush, UnityPoint)
+                    UnityBrush.Color = Color.Gold
+                    UnityGraphics.DrawString(String.Format("{0} Addr:{1},Size:{2}{3}", InsMemoryNode.Process.Name, InsMemoryNode.StartPoint, InsMemoryNode.Size, IIf(InsMemoryNode.Size = InsMemoryNode.Process.Size, "", ",进程大小:" & InsMemoryNode.Process.Size)), Me.Font, UnityBrush, UnityPoint)
                 End If
 
                 If IsNothing(InsMemoryNode.NextNode) Then Exit Do
@@ -377,11 +432,11 @@ Public Class MainForm
                     UnityPoint = New Point(LastX, FreeMemoryRectangle.Top)
                     UnitySize = New Size(InsMemoryNode.Size * FreeMemoryCellWidth, FreeMemoryRectangle.Height)
                     LastX += UnitySize.Width
-                    UnityBrush = New SolidBrush(Color.FromArgb(100, Color.Gray))
+                    UnityBrush = New SolidBrush(Color.FromArgb(120, Color.Gray))
                     UnityGraphics.FillRectangle(UnityBrush, UnityPoint.X, UnityPoint.Y, UnitySize.Width, UnitySize.Height)
                     UnityBrush.Color = Color.FromArgb(200, Color.White)
                     UnityGraphics.DrawLine(UnityPen, UnityPoint.X, FreeMemoryRectangle.Top, UnityPoint.X, FreeMemoryRectangle.Bottom)
-                    UnityGraphics.DrawString(String.Format("空白区域-地址:{0}-大小:{1}".Replace("-", vbCrLf), InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
+                    UnityGraphics.DrawString(String.Format("空闲区-Addr:- {0}-Size:- {1}".Replace("-", vbCrLf), InsMemoryNode.StartPoint, InsMemoryNode.Size), Me.Font, UnityBrush, UnityPoint)
                     NextFreeMemoryNodes(0) = InsMemoryNode
                 End If
 
