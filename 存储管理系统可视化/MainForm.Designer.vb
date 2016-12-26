@@ -220,7 +220,7 @@ Partial Class MainForm
         Me.ProcessMemorySizeNumeric.Size = New System.Drawing.Size(157, 27)
         Me.ProcessMemorySizeNumeric.TabIndex = 28
         Me.ProcessMemorySizeNumeric.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
-        Me.ProcessMemorySizeNumeric.Value = New Decimal(New Integer() {50, 0, 0, 0})
+        Me.ProcessMemorySizeNumeric.Value = New Decimal(New Integer() {100, 0, 0, 0})
         '
         'ProcessListComboBox
         '
@@ -366,9 +366,9 @@ Partial Class MainForm
         Me.Controls.Add(Me.CloseButton)
         Me.Controls.Add(Me.MinButton)
         Me.Controls.Add(Me.ControlPanel)
+        Me.Controls.Add(Me.SegmentPageNumeric)
         Me.Controls.Add(Me.DispathComboBox)
         Me.Controls.Add(Me.FreeMemorySortByAddressPanel)
-        Me.Controls.Add(Me.SegmentPageNumeric)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
         Me.Name = "MainForm"
