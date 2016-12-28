@@ -14,7 +14,7 @@
     ''' <summary>
     ''' 进程分页信息表
     ''' </summary>
-    Public PageList As List(Of Integer)
+    Public PageList As List(Of Integer) = New List(Of Integer)
     ''' <summary>
     ''' 进程标识颜色
     ''' </summary>

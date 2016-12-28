@@ -42,7 +42,6 @@ Partial Class MainForm
         Me.SegmentPageButton = New System.Windows.Forms.Label()
         Me.SegmentPageLabel = New System.Windows.Forms.Label()
         Me.DispathComboBox = New System.Windows.Forms.ComboBox()
-        Me.SegmentPageNumeric = New System.Windows.Forms.ComboBox()
         Me.LogLabel = New 存储管理系统可视化.LeonTextBox()
         CType(Me.ProcessMemorySizeNumeric, System.ComponentModel.ISupportInitialize).BeginInit()
         Me.SuspendLayout()
@@ -217,6 +216,7 @@ Partial Class MainForm
         Me.ProcessMemorySizeNumeric.Maximum = New Decimal(New Integer() {300, 0, 0, 0})
         Me.ProcessMemorySizeNumeric.Minimum = New Decimal(New Integer() {20, 0, 0, 0})
         Me.ProcessMemorySizeNumeric.Name = "ProcessMemorySizeNumeric"
+        Me.ProcessMemorySizeNumeric.ReadOnly = True
         Me.ProcessMemorySizeNumeric.Size = New System.Drawing.Size(157, 27)
         Me.ProcessMemorySizeNumeric.TabIndex = 28
         Me.ProcessMemorySizeNumeric.TextAlign = System.Windows.Forms.HorizontalAlignment.Center
@@ -283,7 +283,7 @@ Partial Class MainForm
         Me.SegmentPageButton.ForeColor = System.Drawing.Color.White
         Me.SegmentPageButton.Image = Global.存储管理系统可视化.My.Resources.UnityResource.SegmentPage
         Me.SegmentPageButton.ImageAlign = System.Drawing.ContentAlignment.MiddleLeft
-        Me.SegmentPageButton.Location = New System.Drawing.Point(15, 365)
+        Me.SegmentPageButton.Location = New System.Drawing.Point(15, 333)
         Me.SegmentPageButton.Name = "SegmentPageButton"
         Me.SegmentPageButton.Size = New System.Drawing.Size(157, 37)
         Me.SegmentPageButton.TabIndex = 33
@@ -311,24 +311,10 @@ Partial Class MainForm
         Me.DispathComboBox.Font = New System.Drawing.Font("微软雅黑", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
         Me.DispathComboBox.FormattingEnabled = True
         Me.DispathComboBox.Items.AddRange(New Object() {"首次适应算法", "循环首次适应算法", "最佳适应算法", "最坏适应算法"})
-        Me.DispathComboBox.Location = New System.Drawing.Point(15, 333)
+        Me.DispathComboBox.Location = New System.Drawing.Point(15, 378)
         Me.DispathComboBox.Name = "DispathComboBox"
         Me.DispathComboBox.Size = New System.Drawing.Size(157, 28)
         Me.DispathComboBox.TabIndex = 37
-        '
-        'SegmentPageNumeric
-        '
-        Me.SegmentPageNumeric.BackColor = System.Drawing.Color.White
-        Me.SegmentPageNumeric.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList
-        Me.SegmentPageNumeric.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.SegmentPageNumeric.Font = New System.Drawing.Font("微软雅黑", 11.25!, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, CType(134, Byte))
-        Me.SegmentPageNumeric.FormattingEnabled = True
-        Me.SegmentPageNumeric.Items.AddRange(New Object() {"2", "4", "8", "16", "32"})
-        Me.SegmentPageNumeric.Location = New System.Drawing.Point(15, 333)
-        Me.SegmentPageNumeric.Name = "SegmentPageNumeric"
-        Me.SegmentPageNumeric.Size = New System.Drawing.Size(157, 28)
-        Me.SegmentPageNumeric.TabIndex = 38
-        Me.SegmentPageNumeric.Visible = False
         '
         'LogLabel
         '
@@ -348,7 +334,6 @@ Partial Class MainForm
         Me.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch
         Me.ClientSize = New System.Drawing.Size(799, 423)
         Me.Controls.Add(Me.SegmentPageLabel)
-        Me.Controls.Add(Me.SegmentPageButton)
         Me.Controls.Add(Me.AddProcessLabel)
         Me.Controls.Add(Me.DisposeProcessLabel)
         Me.Controls.Add(Me.RelocateButton)
@@ -366,8 +351,8 @@ Partial Class MainForm
         Me.Controls.Add(Me.CloseButton)
         Me.Controls.Add(Me.MinButton)
         Me.Controls.Add(Me.ControlPanel)
-        Me.Controls.Add(Me.SegmentPageNumeric)
         Me.Controls.Add(Me.DispathComboBox)
+        Me.Controls.Add(Me.SegmentPageButton)
         Me.Controls.Add(Me.FreeMemorySortByAddressPanel)
         Me.DoubleBuffered = True
         Me.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None
@@ -402,5 +387,4 @@ Partial Class MainForm
     Friend WithEvents SegmentPageButton As Label
     Friend WithEvents SegmentPageLabel As Label
     Friend WithEvents DispathComboBox As ComboBox
-    Friend WithEvents SegmentPageNumeric As ComboBox
 End Class
